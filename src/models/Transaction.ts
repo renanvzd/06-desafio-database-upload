@@ -19,7 +19,7 @@ class Transaction {
   title: string;
 
   @Column()
-  type: 'income' | 'outcome';
+  type: 'income | outcome';
 
   @Column('decimal')
   value: number;
