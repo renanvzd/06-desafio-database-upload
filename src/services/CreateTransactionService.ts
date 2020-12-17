@@ -8,7 +8,7 @@ import Transaction from '../models/Transaction';
 
 interface Request {
   title: string;
-  type: 'income | outcome';
+  type: 'income' | 'outcome';
   value: number;
   category: string;
 }
