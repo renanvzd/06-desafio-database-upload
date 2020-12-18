@@ -16,7 +16,7 @@ interface CSVTransaction {
 
 class ImportTransactionsService {
   async execute(filePath: string): Promise<Transaction[]> {
-    const transactionsRepository = getCustomRepository(TransactionsRepository);
+    const transactionRepository = getCustomRepository(TransactionsRepository);
     const categoriesRepository = getRepository(Category);
 
     const contactsReadStream = fs.createReadStream(filePath);
@@ -69,6 +69,26 @@ class ImportTransactionsService {
 
     // Salvar no banco de dados as categorias importadas no .csv
     await categoriesRepository.save(newCategories);
+
+    const finalCategories = [...newCategories, ...existentCategories];
+
+    // Identificar qual categoria é vinculada a cada transação
+    const createdTransactions = transactionRepository.create(
+      transactions.map(transaction => ({
+        title: transaction.title,
+        type: transaction.type,
+        value: transaction.value,
+        category: finalCategories.find(
+          category => category.title === transaction.category,
+        ),
+      })),
+    );
+    await transactionRepository.save(createdTransactions);
+
+    // Para deletar o arquivo .csv importado
+    await fs.promises.unlink(filePath);
+
+    return createdTransactions;
   }
 }
 
