@@ -50,8 +50,25 @@ class ImportTransactionsService {
       },
     });
 
-    console.log(existentCategories);
-    console.log(transactions);
+    // Filtrar por categorias que já existem
+    const existentCategoriesTitles = existentCategories.map(
+      (category: Category) => category.title,
+    );
+
+    const addCategoryTitles = categories
+      // Filtrar por categorias que NÃO existem
+      .filter(category => !existentCategoriesTitles.includes(category))
+      // Retirar categorias duplicadas
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    const newCategories = categoriesRepository.create(
+      addCategoryTitles.map(title => ({
+        title,
+      })),
+    );
+
+    // Salvar no banco de dados as categorias importadas no .csv
+    await categoriesRepository.save(newCategories);
   }
 }
 
